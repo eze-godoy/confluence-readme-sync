@@ -1,5 +1,4 @@
 FROM python:3-slim
-ADD . /action
 
 WORKDIR /action
 
@@ -8,7 +7,8 @@ RUN pip install pipenv && \
   pipenv install --system --deploy && \
   pipenv --clear
 
-COPY ./src .
+COPY ./src ./src
+COPY ./main.py .
 
 ENTRYPOINT [ "python" ]
-CMD [ "/action/main.py" ]
+CMD [ "main.py" ]
