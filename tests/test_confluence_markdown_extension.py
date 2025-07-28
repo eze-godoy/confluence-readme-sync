@@ -32,6 +32,16 @@ class TestCodeBlockPostprocessor(unittest.TestCase):
         text = "<pre><code>echo 'hello world'</code></pre>"
         processed_text = self.postprocessor.run(text)
         self.assertEqual(processed_text, "<ac:structured-macro ac:name=\"code\"><ac:parameter ac:name=\"language\">none</ac:parameter><ac:plain-text-body><![CDATA[echo 'hello world']]></ac:plain-text-body></ac:structured-macro>")
+    
+    def test_run_with_indented_code(self):
+        text = "<pre><code class=\"language-bash\">   cp template.json repositories/my-new-service.json\n   cd repositories</code></pre>"
+        processed_text = self.postprocessor.run(text)
+        self.assertEqual(processed_text, "<ac:structured-macro ac:name=\"code\"><ac:parameter ac:name=\"language\">shell</ac:parameter><ac:plain-text-body><![CDATA[cp template.json repositories/my-new-service.json\ncd repositories]]></ac:plain-text-body></ac:structured-macro>")
+    
+    def test_run_with_mixed_indentation(self):
+        text = "<pre><code class=\"language-python\">    def hello():\n        print(&quot;world&quot;)\n    \n    hello()</code></pre>"
+        processed_text = self.postprocessor.run(text)
+        self.assertEqual(processed_text, "<ac:structured-macro ac:name=\"code\"><ac:parameter ac:name=\"language\">python</ac:parameter><ac:plain-text-body><![CDATA[def hello():\n    print(\"world\")\n\nhello()]]></ac:plain-text-body></ac:structured-macro>")
 
 class TestConfluenceExtension(unittest.TestCase):
     def test_extend_markdown(self):

@@ -33,11 +33,21 @@ class CodeBlockPostprocessor(Postprocessor):
         Replaces HTML code blocks with Confluence code snippet macros with language support.
         """
         def decode_and_wrap(match):
-            """Helper function to decode HTML entities and wrap in CDATA"""
+            """Helper function to decode HTML entities, remove indentation, and wrap in CDATA"""
             language = match.group(1) if match.lastindex >= 1 else "none"
             code_content = match.group(2) if match.lastindex >= 2 else match.group(1)
             # Decode HTML entities in the code content
             decoded_content = html.unescape(code_content)
+            # Remove common indentation from all lines
+            lines = decoded_content.split('\n')
+            if len(lines) > 1:
+                # Find the minimum indentation (excluding empty lines)
+                non_empty_lines = [line for line in lines if line.strip()]
+                if non_empty_lines:
+                    min_indent = min(len(line) - len(line.lstrip()) for line in non_empty_lines)
+                    # Remove the common indentation from all lines
+                    lines = [line[min_indent:] if len(line) >= min_indent else line for line in lines]
+                    decoded_content = '\n'.join(lines)
             return f'<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">{language}</ac:parameter><ac:plain-text-body><![CDATA[{decoded_content}]]></ac:plain-text-body></ac:structured-macro>'
         
         # First, handle code blocks with language specification
